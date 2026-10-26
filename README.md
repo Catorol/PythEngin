@@ -2,24 +2,29 @@
 
 # research-graph
 
-[![CI](https://github.com/Catorol/PythEngin/actions/workflows/ci.yml/badge.svg)](https://github.com/Catorol/PythEngin/actions)
+`research-graph` — учебный проект курса по разработке на Python и инженерии данных.  
+Проект развивается в течение семестра: в каждой лабораторной добавляется новая часть.
 
-ОПИСАНИЕ ВРЕМЕННО ОТСУСТВУЕТ
+Текущая прикладная задача — анализ и предсказание **вирусности видео в TikTok Shop** по признакам, доступным до или в момент публикации (автор, товар, формат ролика, hook, кампания, время).  
+Данные: [TikTok Shop Viral Sales and CAC Attribution](https://www.kaggle.com/datasets/datascikhan/tiktok-shop-viral-sales-and-cac-attribution).
 
-Проект развивается на протяжении семестра, в каждой лабораторной добавляется новая часть.
+Основа репозитория — инженерный каркас: CLI `rg`, конфигурация через `RG_*`, логирование, тесты, линтеры и CI. Поверх него наращиваются обработка данных, обучение модели, API и интерфейс.
 
 ## Требования
 
 - Python 3.12+
 - [uv](https://docs.astral.sh/uv/) — менеджер зависимостей и окружений
+- Git
 
 ## Установка
 
 ```bash
 git clone https://github.com/Catorol/PythEngin.git
-cd /PythEngin
+cd PythEngin
 uv sync
 ```
+
+`uv sync` создаёт виртуальное окружение, ставит зависимости по `uv.lock` и использует версию Python из `.python-version`.
 
 Проверка, что всё работает:
 
@@ -29,11 +34,11 @@ uv run rg version
 
 ## Конфигурация
 
-Настройки читаются из переменных окружения с префиксом `RG_`.
+Настройки читаются из переменных окружения с префиксом `RG_`.  
 
 | Переменная | Описание | По умолчанию | Ограничения |
 |---|---|---|---|
-| `RG_GITHUB_TOKEN` | Токен GitHub (в выводе маскируется) | не задан | — |
+| `RG_GITHUB_TOKEN` | Токен GitHub (в выводе CLI маскируется) | не задан | — |
 | `RG_DATA_DIR` | Каталог для данных | `data` | — |
 | `RG_LOG_LEVEL` | Уровень логирования | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
 | `RG_REQUEST_TIMEOUT` | Таймаут запросов, секунды | `30.0` | больше 0, не больше 300 |
@@ -55,11 +60,9 @@ uv run rg --help
 ```
 
 ```
-version   Показать версию пакета.
-
-check-config  Загрузить настройки и показать сводку (токен маскируется).
+version        Показать версию пакета.
+check-config   Загрузить настройки и показать сводку (токен маскируется).
 ```
-
 
 Версия пакета:
 
@@ -102,15 +105,22 @@ github_token:     ghp_****alue
 uv run pytest                    # тесты и покрытие
 uv run ruff check .              # линтер
 uv run ruff format .             # форматирование
+uv run ruff format --check .     # проверка форматирования без изменений
 uv run mypy                      # проверка типов
 uv run pre-commit run --all-files   # все проверки сразу
 ```
 
-Перед первой работой один раз выполните `uv run pre-commit install`, чтобы проверки запускались при каждом коммите.
+Перед первой работой один раз выполните:
+
+```bash
+uv run pre-commit install
+```
+
+Те же проверки (линт, типы, тесты) выполняет CI на push и pull request.
 
 ## Структура проекта
 
-```
+```text
 .
 ├── .github/workflows/ci.yml      # непрерывная интеграция
 ├── .pre-commit-config.yaml       # хуки перед коммитом
