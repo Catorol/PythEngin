@@ -11,6 +11,8 @@ class Settings(BaseSettings):
 
     github_token: str | None = None
     data_dir: Path = Path("data")
+    model_dir: Path = Path("models")
+    database_url: str = "postgresql+psycopg://rg:rg@localhost:5432/rg"
     log_level: str = "INFO"
     request_timeout: float = Field(default=30.0, gt=0, le=300)
     max_concurrency: int = Field(default=8, ge=1, le=64)
