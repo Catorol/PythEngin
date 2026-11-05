@@ -1,0 +1,80 @@
+{
+  "variant": "Признаки до публикации",
+  "target": "viral_flag",
+  "n_rows": 100000,
+  "positive_rate": 0.1266,
+  "test_size": 0.2,
+  "models": {
+    "logistic_regression": {
+      "roc_auc": 0.6694,
+      "fit_seconds": 10.79
+    },
+    "random_forest": {
+      "roc_auc": 0.6695,
+      "fit_seconds": 52.98
+    },
+    "hist_gradient_boosting": {
+      "roc_auc": 0.6713,
+      "fit_seconds": 11.27
+    }
+  },
+  "best_model": "hist_gradient_boosting",
+  "best_roc_auc": 0.6713,
+  "k_features": 25,
+  "selected_features": [
+    "creator_followers",
+    "creator_account_age_days",
+    "creator_post_frequency",
+    "creator_engagement_rate",
+    "creator_average_views",
+    "creator_average_likes",
+    "creator_average_comments",
+    "creator_average_shares",
+    "creator_average_saves",
+    "creator_relevance_score",
+    "creator_authority_score",
+    "creator_conversion_score",
+    "creator_sales_score",
+    "creator_commission_rate",
+    "scarcity_score",
+    "month",
+    "discount_eligible_flag",
+    "season_Winter",
+    "creator_tier_Macro",
+    "creator_tier_Mega",
+    "creator_tier_Micro",
+    "creator_tier_Mid-Tier",
+    "creator_tier_Nano",
+    "creator_category_Parenting",
+    "hook_type_Curiosity"
+  ],
+  "excluded_as_leakage": [
+    "viral_traffic_flag",
+    "viral_score",
+    "virality_index",
+    "viral_tier",
+    "viral_growth_rate",
+    "viral_decay_rate",
+    "viral_duration_hours",
+    "viral_peak_hour",
+    "viral_peak_views",
+    "viral_lifecycle_stage",
+    "video_views",
+    "unique_viewers",
+    "view_velocity",
+    "view_growth_rate",
+    "likes",
+    "comments",
+    "shares",
+    "saves",
+    "engagement_rate",
+    "share_rate",
+    "video_age_hours",
+    "video_age_days",
+    "average_watch_time_seconds",
+    "three_second_view_rate",
+    "net_profit",
+    "roas",
+    "cac"
+  ]
+}
