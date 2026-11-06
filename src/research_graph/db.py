@@ -18,8 +18,10 @@ class Base(DeclarativeBase):
 
 
 def create_db_engine(url: str) -> Engine:
-    engine = create_engine(url, pool_pre_ping=True)
-    if engine.dialect.name == "sqlite":
+    is_sqlite = url.startswith("sqlite")
+    connect_args = {"check_same_thread": False} if is_sqlite else {}
+    engine = create_engine(url, pool_pre_ping=True, connect_args=connect_args)
+    if is_sqlite:
 
         @event.listens_for(engine, "connect")
         def _enable_foreign_keys(dbapi_connection: Any, _record: Any) -> None:

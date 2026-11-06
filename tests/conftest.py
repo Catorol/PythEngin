@@ -1,13 +1,19 @@
 import logging
 import os
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
 import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session, sessionmaker
 
+import research_graph.models  # noqa: F401  (регистрирует таблицы в metadata)
+from research_graph.api.deps import get_db
+from research_graph.db import Base, create_db_engine, create_session_factory
+from research_graph.main import create_app
 from research_graph.ml.features import (
     CATEGORICAL_FEATURES,
     FLAG_FEATURES,
@@ -55,3 +61,73 @@ def frame() -> pd.DataFrame:
     score = df["creator_engagement_rate"] + rng.normal(0, 5, n)
     df[TARGET] = (score > score.quantile(0.8)).astype(int)
     return df
+
+
+@pytest.fixture
+def session_factory(tmp_path: Path) -> Iterator[sessionmaker[Session]]:
+    engine = create_db_engine(f"sqlite:///{(tmp_path / 'api.db').as_posix()}")
+    Base.metadata.create_all(engine)
+    yield create_session_factory(engine)
+    engine.dispose()
+
+
+@pytest.fixture
+def client(session_factory: sessionmaker[Session]) -> Iterator[TestClient]:
+    app = create_app()
+
+    def override_get_db() -> Iterator[Session]:
+        with session_factory() as session:
+            yield session
+
+    app.dependency_overrides[get_db] = override_get_db
+    with TestClient(app) as test_client:
+        yield test_client
+
+
+@pytest.fixture
+def make_creator(client: TestClient) -> Callable[..., dict[str, Any]]:
+    def factory(external_id: str = "c1", **overrides: Any) -> dict[str, Any]:
+        payload = {
+            "external_id": external_id,
+            "tier": "Micro",
+            "category": "Beauty",
+            "country": "US",
+            "followers": 1000,
+            "engagement_rate": 5.0,
+            **overrides,
+        }
+        response = client.post("/creators", json=payload)
+        assert response.status_code == 201, response.text
+        return dict(response.json())
+
+    return factory
+
+
+@pytest.fixture
+def make_product(client: TestClient) -> Callable[..., dict[str, Any]]:
+    def factory(external_id: str = "p1", **overrides: Any) -> dict[str, Any]:
+        payload = {"external_id": external_id, "category": "Beauty", "price": 19.9, **overrides}
+        response = client.post("/products", json=payload)
+        assert response.status_code == 201, response.text
+        return dict(response.json())
+
+    return factory
+
+
+@pytest.fixture
+def make_video(
+    client: TestClient,
+    make_creator: Callable[..., dict[str, Any]],
+    make_product: Callable[..., dict[str, Any]],
+) -> Callable[..., dict[str, Any]]:
+    def factory(external_id: str = "v1", **overrides: Any) -> dict[str, Any]:
+        if "creator_id" not in overrides:
+            overrides["creator_id"] = make_creator(f"c-{external_id}")["id"]
+        if "product_id" not in overrides:
+            overrides["product_id"] = make_product(f"p-{external_id}")["id"]
+        payload = {"external_id": external_id, "length_seconds": 30, **overrides}
+        response = client.post("/videos", json=payload)
+        assert response.status_code == 201, response.text
+        return dict(response.json())
+
+    return factory
