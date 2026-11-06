@@ -3,15 +3,15 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Query, Response
 
 from research_graph.api.deps import DbSession
-from research_graph.api.errors import ErrorResponse
+from research_graph.api.errors import ErrorResponse, ResponsesDict
 from research_graph.schemas.common import Page, SortOrder
 from research_graph.schemas.creator import CreatorCreate, CreatorRead, CreatorUpdate
 from research_graph.services import creators as service
 
 router = APIRouter(prefix="/creators", tags=["creators"])
 
-NOT_FOUND = {404: {"model": ErrorResponse, "description": "Креатор не найден"}}
-CONFLICT = {409: {"model": ErrorResponse, "description": "Конфликт данных"}}
+NOT_FOUND: ResponsesDict = {404: {"model": ErrorResponse, "description": "Креатор не найден"}}
+CONFLICT: ResponsesDict = {409: {"model": ErrorResponse, "description": "Конфликт данных"}}
 
 
 @router.get("", response_model=Page[CreatorRead], summary="Список креаторов")

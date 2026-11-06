@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Query, Response
 
 from research_graph.api.deps import DbSession
-from research_graph.api.errors import ErrorResponse
+from research_graph.api.errors import ErrorResponse, ResponsesDict
 from research_graph.schemas.common import Page, SortOrder
 from research_graph.schemas.video import (
     VideoCreate,
@@ -18,8 +18,11 @@ from research_graph.services import videos as service
 
 router = APIRouter(prefix="/videos", tags=["videos"])
 
-NOT_FOUND = {404: {"model": ErrorResponse, "description": "Не найдено"}}
-CONFLICT = {409: {"model": ErrorResponse, "description": "Конфликт или запрещённый переход"}}
+NOT_FOUND: ResponsesDict = {404: {"model": ErrorResponse, "description": "Не найдено"}}
+CONFLICT: ResponsesDict = {
+    409: {"model": ErrorResponse, "description": "Конфликт или запрещённый переход"}
+}
+BAD_REQUEST: ResponsesDict = {400: {"model": ErrorResponse}}
 
 
 @router.get("", response_model=Page[VideoRead], summary="Список видео")
@@ -59,7 +62,7 @@ def list_videos(
     "",
     response_model=VideoDetail,
     status_code=201,
-    responses={**NOT_FOUND, **CONFLICT, 400: {"model": ErrorResponse}},
+    responses={**NOT_FOUND, **CONFLICT, **BAD_REQUEST},
     summary="Создать видео (статус draft)",
 )
 def create_video(data: VideoCreate, db: DbSession) -> VideoDetail:

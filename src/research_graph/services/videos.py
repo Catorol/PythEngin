@@ -71,9 +71,7 @@ def list_videos(
 
 
 def get_video(db: Session, video_id: int) -> Video:
-    video = db.scalar(
-        select(Video).options(selectinload(Video.hooks)).where(Video.id == video_id)
-    )
+    video = db.scalar(select(Video).options(selectinload(Video.hooks)).where(Video.id == video_id))
     if video is None:
         raise NotFoundError(f"Видео {video_id} не найдено")
     return video

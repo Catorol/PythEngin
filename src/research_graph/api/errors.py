@@ -11,6 +11,9 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 log = logging.getLogger(__name__)
 
+# Тип для параметра responses= в декораторах FastAPI (ключи: int | str).
+ResponsesDict = dict[int | str, dict[str, Any]]
+
 
 class ErrorBody(BaseModel):
     code: str
