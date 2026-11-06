@@ -55,9 +55,7 @@ def upgrade() -> None:
         ),
         sa.CheckConstraint("price >= 0", name=op.f("ck_products_price_non_negative")),
         sa.CheckConstraint("rating BETWEEN 0 AND 5", name=op.f("ck_products_rating_range")),
-        sa.CheckConstraint(
-            "review_count >= 0", name=op.f("ck_products_review_count_non_negative")
-        ),
+        sa.CheckConstraint("review_count >= 0", name=op.f("ck_products_review_count_non_negative")),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_products")),
         sa.UniqueConstraint("external_id", name=op.f("uq_products_external_id")),
     )
