@@ -66,3 +66,24 @@ def train(
     typer.echo(
         f"Лучшая: {metrics['best_model']} (ROC-AUC={metrics['best_roc_auc']}) -> {target_dir}"
     )
+
+
+@app.command("register-model")
+def register_model_cmd(
+    path: Path = typer.Option(
+        Path("models/model.pkl"), "--path", exists=True, dir_okay=False, help="Файл модели"
+    ),
+) -> None:
+    """Зарегистрировать обученную модель в БД и сделать её активной (повтор безопасен)."""
+    from research_graph.db import create_db_engine, create_session_factory
+    from research_graph.services.ml import register_baseline
+
+    settings = get_settings()
+    setup_logging(settings.log_level)
+    factory = create_session_factory(create_db_engine(settings.database_url))
+    with factory() as db:
+        version, created = register_baseline(db, path)
+    if created:
+        typer.echo(f"Модель зарегистрирована и активна: id={version.id}, {version.algorithm}")
+    else:
+        typer.echo(f"Модель уже зарегистрирована: id={version.id}")

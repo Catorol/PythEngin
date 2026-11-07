@@ -1,13 +1,17 @@
+import io
 import logging
 import os
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
 
+import joblib
 import numpy as np
 import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
 from sqlalchemy.orm import Session, sessionmaker
 
 import research_graph.models  # noqa: F401  (регистрирует таблицы в metadata)
@@ -20,6 +24,8 @@ from research_graph.ml.features import (
     NUMERIC_FEATURES,
     TARGET,
 )
+from research_graph.ml.preprocessing import build_pipeline, clean_dataset
+from research_graph.services.ml import clear_model_cache
 
 
 @pytest.fixture(autouse=True)
@@ -43,6 +49,13 @@ def restore_logging() -> Iterator[None]:
     root.setLevel(old_level)
     for name in ("httpx", "httpcore", "urllib3", "asyncio"):
         logging.getLogger(name).setLevel(logging.NOTSET)
+
+
+@pytest.fixture(autouse=True)
+def reset_model_cache() -> Iterator[None]:
+    clear_model_cache()
+    yield
+    clear_model_cache()
 
 
 @pytest.fixture
@@ -131,3 +144,16 @@ def make_video(
         return dict(response.json())
 
     return factory
+
+
+@pytest.fixture
+def fitted_pipeline(frame: pd.DataFrame) -> Pipeline:
+    X, y = clean_dataset(frame)
+    return build_pipeline(LogisticRegression(max_iter=500), k_features=10).fit(X, y)
+
+
+@pytest.fixture
+def model_bytes(fitted_pipeline: Pipeline) -> bytes:
+    buffer = io.BytesIO()
+    joblib.dump(fitted_pipeline, buffer)
+    return buffer.getvalue()
