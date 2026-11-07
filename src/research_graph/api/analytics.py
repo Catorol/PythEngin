@@ -13,9 +13,7 @@ router = APIRouter(prefix="/analytics", tags=["analytics"])
 @router.get(
     "/virality-by-hook", response_model=list[HookStat], summary="Виральность по типам хуков"
 )
-def virality_by_hook(
-    db: DbSession, min_videos: Annotated[int, Query(ge=1)] = 1
-) -> list[HookStat]:
+def virality_by_hook(db: DbSession, min_videos: Annotated[int, Query(ge=1)] = 1) -> list[HookStat]:
     """Для каждого хука: число видео, число виральных и доля виральных."""
     return service.virality_by_hook(db, min_videos=min_videos)
 

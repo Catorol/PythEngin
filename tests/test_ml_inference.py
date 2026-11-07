@@ -26,7 +26,9 @@ def test_records_to_frame_adds_missing_columns() -> None:
     assert frame.shape == (1, len(FEATURES))
 
 
-def test_predict_proba_returns_probabilities(fitted_pipeline: Pipeline, frame: pd.DataFrame) -> None:
+def test_predict_proba_returns_probabilities(
+    fitted_pipeline: Pipeline, frame: pd.DataFrame
+) -> None:
     records = frame[FEATURES].head(3).to_dict("records")
     probabilities = predict_proba(fitted_pipeline, records_to_frame(records))
     assert probabilities.shape == (3,)
@@ -77,7 +79,9 @@ def test_read_csv_features_rejects_empty_file(frame: pd.DataFrame) -> None:
 def test_score_dataset_adds_columns_and_roc_auc(frame: pd.DataFrame) -> None:
     probabilities = frame["creator_engagement_rate"].rank(pct=True).to_numpy() * 0.5
     scored, roc_auc = score_dataset(frame, probabilities)
-    assert {"predicted_probability", "predicted_viral_flag", "recommendation"} <= set(scored.columns)
+    assert {"predicted_probability", "predicted_viral_flag", "recommendation"} <= set(
+        scored.columns
+    )
     assert roc_auc is not None and roc_auc > 0.7
     assert len(scored) == len(frame)
 

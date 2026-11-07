@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, File, Query, Response, UploadFile
 
@@ -19,8 +19,12 @@ router = APIRouter(tags=["ml"])
 MAX_MODEL_BYTES = 100 * 1024 * 1024
 MODEL_SUFFIXES = {".pkl", ".joblib"}
 
-NO_MODEL = {409: {"model": ErrorResponse, "description": "Модель не загружена"}}
-BAD_INPUT = {400: {"model": ErrorResponse, "description": "Некорректный файл или данные"}}
+NO_MODEL: dict[int | str, dict[str, Any]] = {
+    409: {"model": ErrorResponse, "description": "Модель не загружена"}
+}
+BAD_INPUT: dict[int | str, dict[str, Any]] = {
+    400: {"model": ErrorResponse, "description": "Некорректный файл или данные"}
+}
 
 
 @router.post(
@@ -93,7 +97,9 @@ def predict_video(video_id: int, db: DbSession) -> VideoPrediction:
 def predict_from_csv(
     db: DbSession,
     file: Annotated[UploadFile, File(description="CSV с признаками (можно и с viral_flag)")],
-    limit: Annotated[int, Query(ge=1, le=100000, description="Сколько строк вернуть в JSON")] = 1000,
+    limit: Annotated[
+        int, Query(ge=1, le=100000, description="Сколько строк вернуть в JSON")
+    ] = 1000,
     response_format: Annotated[Literal["json", "csv"], Query(alias="format")] = "json",
 ) -> CsvPredictionResponse | Response:
     """Если в CSV есть viral_flag с двумя классами, вернётся roc_auc.
@@ -104,9 +110,7 @@ def predict_from_csv(
             "Content-Disposition": 'attachment; filename="predictions.csv"',
             "X-ROC-AUC": "" if roc_auc is None else str(roc_auc),
         }
-        return Response(
-            content=scored.to_csv(index=False), media_type="text/csv", headers=headers
-        )
+        return Response(content=scored.to_csv(index=False), media_type="text/csv", headers=headers)
     head = scored.head(limit).astype(object)
     rows = head.where(head.notna(), None).to_dict("records")
     return CsvPredictionResponse(

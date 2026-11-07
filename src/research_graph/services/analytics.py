@@ -10,6 +10,10 @@ from research_graph.models.video import video_hooks
 from research_graph.schemas.analytics import CreatorStat, HookStat, TrendPoint
 
 
+def _int(value: int | None) -> int:
+    return int(value or 0)
+
+
 def _rate(viral: int, total: int) -> float:
     return round(viral / total, 4) if total else 0.0
 
@@ -29,9 +33,9 @@ def virality_by_hook(db: Session, *, min_videos: int = 1) -> list[HookStat]:
         HookStat(
             hook_code=code,
             hook_title=title,
-            videos=int(total),
-            viral_videos=int(v),
-            viral_rate=_rate(int(v), int(total)),
+            videos=_int(total),
+            viral_videos=_int(v),
+            viral_rate=_rate(_int(v), _int(total)),
         )
         for code, title, total, v in db.execute(stmt)
     ]
@@ -57,10 +61,10 @@ def top_creators(db: Session, *, limit: int = 10, min_videos: int = 5) -> list[C
             creator_id=cid,
             external_id=ext,
             tier=tier,
-            followers=int(followers),
-            videos=int(n),
-            viral_videos=int(v),
-            viral_rate=_rate(int(v), int(n)),
+            followers=_int(followers),
+            videos=_int(n),
+            viral_videos=_int(v),
+            viral_rate=_rate(_int(v), _int(n)),
         )
         for cid, ext, tier, followers, n, v in db.execute(stmt)
     ]
@@ -83,10 +87,10 @@ def viral_trend(
     stmt = stmt.group_by(year, month).order_by(year, month)
     return [
         TrendPoint(
-            period=f"{int(y):04d}-{int(m):02d}",
-            videos=int(n),
-            viral_videos=int(v),
-            viral_rate=_rate(int(v), int(n)),
+            period=f"{_int(y):04d}-{_int(m):02d}",
+            videos=_int(n),
+            viral_videos=_int(v),
+            viral_rate=_rate(_int(v), _int(n)),
         )
         for y, m, n, v in db.execute(stmt)
     ]

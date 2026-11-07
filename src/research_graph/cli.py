@@ -67,6 +67,7 @@ def train(
         f"Лучшая: {metrics['best_model']} (ROC-AUC={metrics['best_roc_auc']}) -> {target_dir}"
     )
 
+
 @app.command("register-model")
 def register_model_cmd(
     path: Path = typer.Option(

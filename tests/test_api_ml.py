@@ -116,7 +116,9 @@ def test_predict_from_csv_returns_roc_auc_and_rows(
     assert body["roc_auc"] is not None and body["roc_auc"] > 0.5
     assert body["rows_total"] == len(frame)
     assert body["rows_returned"] == 5
-    assert {"predicted_probability", "predicted_viral_flag", "recommendation"} <= set(body["rows"][0])
+    assert {"predicted_probability", "predicted_viral_flag", "recommendation"} <= set(
+        body["rows"][0]
+    )
 
 
 def test_predict_from_csv_without_target_has_no_roc_auc(
@@ -145,12 +147,16 @@ def test_predict_from_csv_with_missing_columns_returns_400(
     client: TestClient, model_bytes: bytes, frame: pd.DataFrame
 ) -> None:
     upload(client, model_bytes)
-    response = client.post("/predict-from-csv", files=csv_file(frame.drop(columns=["product_price"])))
+    response = client.post(
+        "/predict-from-csv", files=csv_file(frame.drop(columns=["product_price"]))
+    )
     assert response.status_code == 400
     assert "product_price" in response.json()["error"]["message"]
 
 
-def test_predict_from_csv_without_model_returns_409(client: TestClient, frame: pd.DataFrame) -> None:
+def test_predict_from_csv_without_model_returns_409(
+    client: TestClient, frame: pd.DataFrame
+) -> None:
     response = client.post("/predict-from-csv", files=csv_file(frame))
     assert response.status_code == 409
 
