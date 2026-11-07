@@ -85,3 +85,7 @@ def register_error_handlers(app: FastAPI) -> None:
     async def handle_unexpected(_: Request, exc: Exception) -> JSONResponse:
         log.exception("Unhandled error", exc_info=exc)
         return error_response(500, "internal_error", "Внутренняя ошибка сервера")
+
+
+class ModelNotLoadedError(ConflictError):
+    code = "model_not_loaded"
