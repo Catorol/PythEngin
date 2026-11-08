@@ -1,9 +1,14 @@
 from importlib.metadata import version as pkg_version
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 from research_graph.api import analytics, creators, ml, products, videos
 from research_graph.api.errors import register_error_handlers
+
+WEB_DIR = Path(__file__).parent / "web"
 
 
 def create_app() -> FastAPI:
@@ -23,6 +28,11 @@ def create_app() -> FastAPI:
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
+    @app.get("/", include_in_schema=False)
+    def root() -> RedirectResponse:
+        return RedirectResponse("/ui/")
+
+    app.mount("/ui", StaticFiles(directory=WEB_DIR, html=True), name="ui")
     return app
 
 
