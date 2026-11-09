@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Прогноз виральности видео TikTok Shop</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Перейти к содержимому</a>
+    <header>
+      <h1>Прогноз виральности видео TikTok Shop</h1>
+      <nav aria-label="Разделы">
+        <button type="button" data-tab="predict" aria-current="page">Прогноз</button>
+        <button type="button" data-tab="videos">Видео</button>
+        <button type="button" data-tab="creators">Креаторы</button>
+        <button type="button" data-tab="models">Модели</button>
+        <button type="button" data-tab="analytics">Аналитика</button>
+      </nav>
+    </header>
+
+    <div id="notice" role="alert" aria-live="assertive" hidden></div>
+
+    <main id="main">
+      <section id="tab-predict" data-panel="predict" aria-labelledby="h-predict">
+        <h2 id="h-predict">Прогноз по параметрам видео</h2>
+        <p class="hint">
+          Заполните известные до публикации параметры. Пустые поля модель заменит типичными
+          значениями. Доля виральных видео в данных около 13%.
+        </p>
+        <form id="predict-form">
+          <div id="predict-fields" class="grid"></div>
+          <fieldset>
+            <legend>Использованные приёмы в начале видео (хуки)</legend>
+            <div id="predict-flags" class="checks"></div>
+          </fieldset>
+          <button type="submit">Предсказать</button>
+        </form>
+        <div id="predict-result" class="card" hidden></div>
+
+        <h3>Пакетное предсказание по CSV</h3>
+        <form id="csv-form">
+          <label>
+            CSV-файл с признаками (можно с колонкой viral_flag)
+            <input type="file" name="file" accept=".csv,text/csv" required />
+          </label>
+          <button type="submit">Загрузить и предсказать</button>
+        </form>
+        <div id="csv-result" class="card" hidden></div>
+      </section>
+
+      <section id="tab-videos" data-panel="videos" aria-labelledby="h-videos" hidden>
+        <h2 id="h-videos">Видео</h2>
+        <form id="video-filters" class="row">
+          <label>Статус
+            <select name="status">
+              <option value="">все</option>
+              <option>draft</option>
+              <option>published</option>
+              <option>boosted</option>
+              <option>archived</option>
+            </select>
+          </label>
+          <label>Формат <input name="video_format" placeholder="Tutorial" /></label>
+          <label>Сортировка
+            <select name="sort_by">
+              <option value="id">по id</option>
+              <option value="published_at">по дате публикации</option>
+              <option value="length_seconds">по длительности</option>
+              <option value="created_at">по созданию</option>
+            </select>
+          </label>
+          <label>Порядок
+            <select name="order">
+              <option value="desc">по убыванию</option>
+              <option value="asc">по возрастанию</option>
+            </select>
+          </label>
+          <button type="submit">Применить</button>
+        </form>
+        <div class="scroll">
+          <table>
+            <caption class="sr-only">Список видео</caption>
+            <thead>
+              <tr>
+                <th>ID</th><th>Внешний ID</th><th>Креатор</th><th>Товар</th><th>Формат</th>
+                <th>Сек.</th><th>Дата</th><th>Статус</th><th>Виральное</th><th>Хуки</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="videos-body"></tbody>
+          </table>
+        </div>
+        <div id="videos-pager" class="pager"></div>
+
+        <h3 id="video-form-title">Новое видео</h3>
+        <form id="video-form" class="grid">
+          <label>Внешний ID <input name="external_id" required maxlength="64" /></label>
+          <label>ID креатора <input name="creator_id" type="number" min="1" required /></label>
+          <label>ID товара <input name="product_id" type="number" min="1" required /></label>
+          <label>Формат <input name="video_format" list="dl-video_format" /></label>
+          <label>Тип заголовка <input name="title_type" list="dl-video_title_type" /></label>
+          <label>Длительность, сек.
+            <input name="length_seconds" type="number" min="1" max="600" required value="30" />
+          </label>
+          <label>Дата публикации <input name="published_at" type="date" /></label>
+          <fieldset>
+            <legend>Хуки</legend>
+            <div id="video-hooks" class="checks"></div>
+          </fieldset>
+          <div class="row">
+            <button type="submit" id="video-submit">Создать</button>
+            <button type="button" id="video-cancel" hidden>Отмена</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="tab-creators" data-panel="creators" aria-labelledby="h-creators" hidden>
+        <h2 id="h-creators">Креаторы</h2>
+        <div class="scroll">
+          <table>
+            <caption class="sr-only">Список креаторов</caption>
+            <thead>
+              <tr>
+                <th>ID</th><th>Внешний ID</th><th>Уровень</th><th>Тематика</th><th>Страна</th>
+                <th>Подписчики</th><th>Вовлечённость, %</th><th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="creators-body"></tbody>
+          </table>
+        </div>
+        <div id="creators-pager" class="pager"></div>
+
+        <h3 id="creator-form-title">Новый креатор</h3>
+        <form id="creator-form" class="grid">
+          <label>Внешний ID <input name="external_id" required maxlength="64" /></label>
+          <label>Уровень <input name="tier" list="dl-creator_tier" required /></label>
+          <label>Тематика <input name="category" list="dl-creator_category" required /></label>
+          <label>Страна <input name="country" list="dl-creator_country" required /></label>
+          <label>Подписчики
+            <input name="followers" type="number" min="0" required value="10000" />
+          </label>
+          <label>Вовлечённость, %
+            <input name="engagement_rate" type="number" min="0" step="0.1" required value="5" />
+          </label>
+          <div class="row">
+            <button type="submit" id="creator-submit">Создать</button>
+            <button type="button" id="creator-cancel" hidden>Отмена</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="tab-models" data-panel="models" aria-labelledby="h-models" hidden>
+        <h2 id="h-models">Модели</h2>
+        <form id="model-form">
+          <label>
+            Файл модели (.pkl). Загружайте только доверенные файлы.
+            <input type="file" name="file" accept=".pkl,.joblib" required />
+          </label>
+          <button type="submit">Загрузить и сделать активной</button>
+        </form>
+        <div class="scroll">
+          <table>
+            <caption class="sr-only">Версии моделей</caption>
+            <thead>
+              <tr>
+                <th>ID</th><th>Название</th><th>Алгоритм</th><th>ROC-AUC</th><th>Активна</th>
+                <th>Создана</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="models-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tab-analytics" data-panel="analytics" aria-labelledby="h-analytics" hidden>
+        <h2 id="h-analytics">Аналитика</h2>
+        <h3>Доля виральных видео по типам хуков</h3>
+        <div id="an-hooks" class="scroll"></div>
+        <h3>Топ креаторов (не менее 5 видео)</h3>
+        <div id="an-creators" class="scroll"></div>
+        <h3>Динамика по месяцам</h3>
+        <div id="an-trend" class="scroll"></div>
+      </section>
+    </main>
+
+    <div id="datalists"></div>
+    <script src="app.js" defer></script>
+  </body>
+</html>
