@@ -15,5 +15,20 @@ services:
       timeout: 3s
       retries: 10
 
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      RG_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-rg}:${POSTGRES_PASSWORD:-rg}@db:5432/${POSTGRES_DB:-rg}
+      RG_MODEL_DIR: /app/models
+      RG_LOG_LEVEL: ${RG_LOG_LEVEL:-INFO}
+    ports:
+      - "8000:8000"
+    volumes:
+      - modeldata:/app/models
+
 volumes:
   pgdata:
+  modeldata:

@@ -1,0 +1,13 @@
+{
+  "name": "research-graph-web",
+  "private": true,
+  "description": "Линтинг фронтенда (src/research_graph/web)",
+  "scripts": {
+    "lint": "eslint src/research_graph/web"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0"
+  }
+}

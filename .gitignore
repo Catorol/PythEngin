@@ -10,3 +10,6 @@ htmlcov/
 .ruff_cache/
 data/*
 !data/sample/
+node_modules/
+coverage.xml
+models/uploaded/
